@@ -42,15 +42,53 @@ Requirements: **JDK 25 or newer**, **Python 3.10 or newer**, Git, and Windows or
 Linux **x86-64**. A graphical desktop is required for the GUI. The first build
 needs internet access for pinned open-source dependencies from Maven Central.
 
-```sh
-git clone https://github.com/tempest1018/bright-stats.git
-cd bright-stats
-python scripts/build_public.py --test
-python scripts/run_public.py --example
-```
+### Windows (PowerShell)
 
-On Linux use `python3` instead of `python`. On Windows `py -3` also works.
-Set `JAVA_HOME` to your JDK if Java tools are not on PATH.
+1. Install an x64 JDK 25+, Python 3.10+ and Git using the
+   [Windows prerequisite instructions](docs/INSTALLATION.md#windows-step-by-step).
+   Open a new PowerShell window after installation.
+2. Download the source and build:
+
+   ```powershell
+   git clone https://github.com/tempest1018/bright-stats.git
+   cd bright-stats
+   python scripts/build_public.py
+   ```
+
+3. Launch the desktop app:
+
+   ```powershell
+   python scripts/run_public.py
+   ```
+
+   Add `--example` to open the included synthetic model. If your installation uses
+   the Python launcher, replace `python` with `py -3` throughout.
+
+### Linux (terminal in a graphical desktop)
+
+1. Install an x86-64 JDK 25+, Python 3.10+, Git and the native GUI libraries using
+   the [Linux prerequisite instructions](docs/INSTALLATION.md#linux-step-by-step).
+2. Download the source and build:
+
+   ```sh
+   git clone https://github.com/tempest1018/bright-stats.git
+   cd bright-stats
+   python3 scripts/build_public.py
+   ```
+
+3. Launch the desktop app:
+
+   ```sh
+   python3 scripts/run_public.py
+   ```
+
+   Add `--example` to open the included synthetic model.
+
+On either platform, optionally run the public checks with
+`build_public.py --test` using the same Python command as above. Tests may take
+several minutes. For later launches, open a terminal in the cloned `bright-stats`
+folder and repeat the launch command; rebuilding is unnecessary unless the source
+changes. Keep the generated JAR and adjacent `lib` directory together.
 
 The public build does not require proprietary installers, recovered source,
 reference datasets, credentials or private tool receipts. After the initial
