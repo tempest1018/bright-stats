@@ -1,7 +1,7 @@
 """Check the exact staged public delta without printing suspected secret values."""
 import hashlib,json,pathlib,re,subprocess,sys
 ROOT=pathlib.Path(__file__).resolve().parents[1]
-ALLOWED_ROOT={'.gitattributes','.gitignore','README.md','SECURITY.md','THIRD_PARTY.md','dependencies.lock.json'}
+ALLOWED_ROOT={'.gitattributes','.gitignore','README.md','LICENSE.md','SECURITY.md','THIRD_PARTY.md','dependencies.lock.json'}
 ALLOWED_DOCS={'docs/'+name for name in ['INSTALLATION.md','USER_GUIDE.md','KNOWN_ISSUES.md','DEVELOPMENT.md']}
 ALLOWED_SCRIPTS={'scripts/'+name for name in ['build_public.py','run_public.py','check_publication.py']}
 ALLOWED_EXAMPLES={'examples/'+name for name in ['README.md','demo.csv','pls.json']}

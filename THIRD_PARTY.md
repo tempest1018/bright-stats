@@ -24,3 +24,11 @@ into the output notices directory. This table is an inventory, not a substitute
 for the complete component/distribution notices. Runtime/native licensing and
 complete notice aggregation must be checked when standalone installers are bundled.
 The JDK is supplied separately by the user for source builds.
+
+## Bright-Stats project license
+
+The project's own material is offered under [PolyForm Noncommercial 1.0.0](LICENSE.md).
+That license does not replace or add restrictions to the independent licenses of
+the third-party components listed above. Preserve their applicable notices and
+terms when redistributing them. Inclusion in this inventory does not grant rights
+to any excluded proprietary reference software or dataset.

@@ -3,6 +3,7 @@
 !/.gitattributes
 !/.gitignore
 !/README.md
+!/LICENSE.md
 !/SECURITY.md
 !/THIRD_PARTY.md
 !/dependencies.lock.json

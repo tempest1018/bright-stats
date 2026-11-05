@@ -120,3 +120,26 @@ Linux execution. The public source build supplies 24 self-contained test groups;
 private compatibility fixtures and logs are excluded. Public tests do not reproduce
 the full private comparison harness. Passing scoped checks do not establish every
 native feature, finite-sample coverage property or clean-install scenario.
+
+## License and charitable purpose
+
+Bright-Stats is a charitable project for the science and mathematics community.
+The Bright-Stats-authored source, documentation, synthetic examples, models,
+templates and reusable settings in this repository are offered under the
+[PolyForm Noncommercial License 1.0.0](LICENSE.md), unless a file states otherwise.
+All app functionality is available without a paid tier or activation requirement.
+
+You may use, study, modify and redistribute the software for purposes permitted
+by that license, retaining its terms and required notices. It permits noncommercial
+purposes and explicitly permits use by charitable organizations, educational
+institutions, public research organizations and other institutions named in the
+license regardless of funding or funding obligations. Commercial purposes outside
+those permissions are not granted. Read the full license for the governing terms.
+
+This is source-available software for the license's permitted purposes, rather
+than OSI-approved open-source software. Third-party components retain their own
+licenses; see [THIRD_PARTY.md](THIRD_PARTY.md). This license grants rights only to
+material the Bright-Stats licensors are entitled to license; it does not relicense
+third-party code, datasets or reference applications.
+
+Required Notice: Copyright 2026 tempest1018 and the Bright-Stats contributors (https://github.com/tempest1018/bright-stats).
