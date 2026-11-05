@@ -1,0 +1,8 @@
+package org.brightstats.desktop;
+import javafx.scene.chart.*;
+import javafx.scene.control.*;
+import javafx.scene.layout.VBox;
+import org.brightstats.stats.PredictionSegmentation;
+final class SegmentationPlots {
+    static void add(TabPane tabs,PredictionSegmentation.Result result){NumberAxis x=new NumberAxis(),y=new NumberAxis();x.setLabel("Recorded step");y.setLabel("In-sample objective");x.setForceZeroInRange(false);y.setForceZeroInRange(false);LineChart<Number,Number> chart=new LineChart<>(x,y);chart.setAnimated(false);chart.setCreateSymbols(false);chart.setTitle("Selected-start segmentation search");XYChart.Series<Number,Number> series=new XYChart.Series<>();series.setName("R² objective");int index=0;for(var step:result.trace())series.getData().add(new XYChart.Data<>(index++,step.objective()));chart.getData().add(series);CategoryAxis group=new CategoryAxis();NumberAxis size=new NumberAxis();group.setLabel("Segment");size.setLabel("Observations");BarChart<String,Number> bars=new BarChart<>(group,size);bars.setAnimated(false);XYChart.Series<String,Number> counts=new XYChart.Series<>();counts.setName("Hard group sizes");for(var segment:result.segments())counts.getData().add(new XYChart.Data<>(""+(segment.index()+1),segment.rows().length));bars.getData().add(counts);Label note=UiAppearance.label("Only recorded hill-climbing moves increase the objective; optional pre-segmentation can reduce it. Hard groups express no posterior uncertainty. In-sample R² is not independent predictive performance.");note.setWrapText(true);VBox content=new VBox(10,note,chart,bars);ScrollPane scroll=new ScrollPane(content);scroll.setFitToWidth(true);Tab tab=new Tab("Segmentation plots",scroll);tab.setClosable(false);tabs.getTabs().add(tab);}
+}

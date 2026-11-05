@@ -1,0 +1,10 @@
+package org.brightstats.data;
+import java.util.*;
+import com.google.gson.*;
+import org.brightstats.stats.*;
+public final class ModelPcaInput {
+    private ModelPcaInput(){}
+    public static ModelPca.Source source(JsonObject input,List<String> names){var element=input.get("context");if(element!=null&&(!element.isJsonPrimitive()||!element.getAsJsonPrimitive().isString()))throw new IllegalArgumentException("Model PCA context must be a string.");var context=element==null?ModelPca.Context.PLS:ModelPca.Context.valueOf(element.getAsString());return switch(context){case PLS->ModelPca.fromPls(names,PlsModelInput.blocks(input.get("blocks")));case CBSEM->ModelPca.fromSem(new Gson().fromJson(input.get("semModel"),SemModel.Model.class));case GSCA->ModelPca.fromGsca(new Gson().fromJson(input.get("gscaModel"),Gsca.Model.class));};}
+    public static ModelPca.Options options(JsonElement value){if(value==null)return ModelPca.Options.defaults();if(!value.isJsonObject())throw new IllegalArgumentException("Model PCA options must be an object.");var object=value.getAsJsonObject();var d=ModelPca.Options.defaults();for(String field:new String[]{"correlation","retention","varianceThreshold"})if(object.has(field)){var element=object.get(field);if(!element.isJsonPrimitive()||field.equals("correlation")&&!element.getAsJsonPrimitive().isBoolean()||field.equals("retention")&&!element.getAsJsonPrimitive().isString()||field.equals("varianceThreshold")&&!element.getAsJsonPrimitive().isNumber())throw new IllegalArgumentException("Invalid model PCA setting type: "+field);}
+        return new ModelPca.Options(object.has("correlation")?object.get("correlation").getAsBoolean():d.correlation(),object.has("retention")?ModelPca.Retention.valueOf(object.get("retention").getAsString()):d.retention(),object.has("components")?PlsModelInput.index(object.get("components")):d.components(),object.has("varianceThreshold")?object.get("varianceThreshold").getAsDouble():d.varianceThreshold(),object.has("rotation")?PcaRotationInput.options(object.get("rotation")):d.rotation());}
+}

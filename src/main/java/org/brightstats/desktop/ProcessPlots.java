@@ -1,0 +1,12 @@
+package org.brightstats.desktop;
+
+import javafx.geometry.Insets;
+import javafx.scene.chart.*;
+import javafx.scene.control.*;
+import javafx.scene.layout.VBox;
+import org.brightstats.stats.PathProcess;
+
+final class ProcessPlots {
+    private ProcessPlots(){}
+    static void add(TabPane tabs,PathProcess.Fit fit,double[][] original){int source=fit.model().source(),target=fit.model().target();double low=Double.POSITIVE_INFINITY,high=Double.NEGATIVE_INFINITY;for(double[] row:original){low=Math.min(low,row[source]);high=Math.max(high,row[source]);}NumberAxis x=new NumberAxis(),y=new NumberAxis();x.setLabel(fit.names().get(source)+" (original units)");x.setForceZeroInRange(false);y.setLabel(fit.names().get(target)+" (original units)");y.setForceZeroInRange(false);LineChart<Number,Number> curves=new LineChart<>(x,y);curves.setTitle("Fitted conditional mean curves");curves.setAnimated(false);curves.setCreateSymbols(false);curves.setMinHeight(430);for(var probe:fit.probes()){var series=new XYChart.Series<Number,Number>();series.setName(probe.name());for(int step=0;step<=40;step++){double value=low+(step/40.0)*(high-low);series.getData().add(new XYChart.Data<>(value,PathProcess.predict(fit,probe,value)));}curves.getData().add(series);}CategoryAxis condition=new CategoryAxis();NumberAxis value=new NumberAxis();condition.setLabel("Original-unit moderator probe");value.setLabel("Effect in "+fit.options().metric()+" model units");BarChart<String,Number> effects=new BarChart<>(condition,value);effects.setTitle("Conditional direct, total indirect and total effects");effects.setAnimated(false);effects.setMinHeight(430);for(String family:new String[]{"Direct","Total indirect","Total"}){var series=new XYChart.Series<String,Number>();series.setName(family);for(var effect:fit.effects())if(effect.family().equals(family))series.getData().add(new XYChart.Data<>(effect.probe(),effect.value()));effects.getData().add(series);}Label note=UiAppearance.label("Curves are fitted structural means, holding controls and other roots at sample means. They show the specified model's association, with no prediction band or causal guarantee. Effect units follow the selected estimation metric.");note.setWrapText(true);VBox charts=new VBox(12,note,curves,effects);charts.setPadding(new Insets(12));ScrollPane scroll=new ScrollPane(charts);scroll.setFitToWidth(true);Tab tab=new Tab("Conditional process plots",scroll);tab.setClosable(false);tabs.getTabs().add(tab);}
+}

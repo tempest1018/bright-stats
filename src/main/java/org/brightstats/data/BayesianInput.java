@@ -1,0 +1,6 @@
+package org.brightstats.data;
+import java.util.*;import com.google.gson.*;import org.brightstats.stats.*;
+public final class BayesianInput {
+ private BayesianInput(){}
+ public static BayesianSem.Options options(JsonElement value){var o=StatisticalInput.object(value,Set.of("priors","chains","warmup","draws","seed","confidence","predictiveDraws"),"Bayesian SEM options",false);if(!o.has("priors")||!o.get("priors").isJsonArray())throw new IllegalArgumentException("Provide an explicit prior array.");List<BayesianSem.Prior> priors=new ArrayList<>();for(var entry:o.getAsJsonArray("priors")){var p=StatisticalInput.object(entry,Set.of("parameter","family","location","scale"),"Bayesian prior",false);priors.add(new BayesianSem.Prior(StatisticalInput.text(p.get("parameter")),StatisticalInput.enumeration(p,"family",BayesianSem.Family.class,BayesianSem.Family.NORMAL),StatisticalInput.number(p,"location",0),StatisticalInput.number(p,"scale",1)));}return new BayesianSem.Options(priors,StatisticalInput.integer(o,"chains",4),StatisticalInput.integer(o,"warmup",1000),StatisticalInput.integer(o,"draws",2000),StatisticalInput.integer64(o,"seed",42),StatisticalInput.number(o,"confidence",.95),StatisticalInput.integer(o,"predictiveDraws",100));}
+}

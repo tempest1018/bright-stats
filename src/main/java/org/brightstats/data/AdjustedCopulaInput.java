@@ -1,0 +1,11 @@
+package org.brightstats.data;
+import java.util.*;
+import com.google.gson.*;
+import org.brightstats.stats.*;
+public final class AdjustedCopulaInput {
+    private AdjustedCopulaInput(){}
+    private static int[] indices(JsonObject object,String field){return object.has(field)?PlsModelInput.indices(object.get(field)):new int[0];}
+    public static AdjustedCopula.Model model(JsonElement value){if(value==null||!value.isJsonObject())throw new IllegalArgumentException("Provide an adjusted-copula system object.");var object=value.getAsJsonObject();List<String> names=new ArrayList<>();for(var name:object.getAsJsonArray("names")){if(!name.isJsonPrimitive()||!name.getAsJsonPrimitive().isString())throw new IllegalArgumentException("Variable names must be text.");names.add(name.getAsString());}List<AdjustedCopula.Correction> corrections=new ArrayList<>();for(var entry:object.getAsJsonArray("corrections")){var c=entry.getAsJsonObject();if(c.has("varyingByCategory")&&(!c.get("varyingByCategory").isJsonPrimitive()||!c.get("varyingByCategory").getAsJsonPrimitive().isBoolean()))throw new IllegalArgumentException("varyingByCategory must be boolean.");corrections.add(new AdjustedCopula.Correction(PlsModelInput.index(c.get("target")),indices(c,"endogenous"),indices(c,"continuousExogenous"),indices(c,"binaryExogenous"),!c.has("varyingByCategory")||c.get("varyingByCategory").getAsBoolean()));}var polynomial=NonlinearInput.specification(object);return new AdjustedCopula.Model(names,PlsModelInput.edges(object.get("paths")),polynomial.extensions(),corrections,polynomial.probes());}
+    public static Map<Integer,Integer> bindings(JsonElement value){Map<Integer,Integer> result=new LinkedHashMap<>();if(value!=null&&!value.isJsonNull())for(var entry:value.getAsJsonObject().entrySet()){int key=Integer.parseInt(entry.getKey());if(key<0||result.put(key,PlsModelInput.index(entry.getValue()))!=null)throw new IllegalArgumentException("Binary bindings must have unique nonnegative component indices.");}return result;}
+    public static ComponentAdjustedCopula.Specification component(JsonElement value){var object=value.getAsJsonObject();return new ComponentAdjustedCopula.Specification(model(object.get("system")),bindings(object.get("binaryBindings")));}
+}

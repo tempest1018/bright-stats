@@ -1,0 +1,8 @@
+package org.brightstats.data;
+import java.util.*;
+import com.google.gson.*;
+import org.brightstats.stats.*;
+public final class HigherOrderInput {
+    private HigherOrderInput(){}
+    public static HigherOrderPls.Specification specification(JsonElement value){if(value==null||!value.isJsonObject())throw new IllegalArgumentException("Provide a higher-order specification.");var object=value.getAsJsonObject();List<HigherOrderPls.Dimension> definitions=new ArrayList<>();for(var entry:object.getAsJsonArray("higherOrder")){var dimension=entry.getAsJsonObject();var name=dimension.get("name");if(name==null||!name.isJsonPrimitive()||!name.getAsJsonPrimitive().isString())throw new IllegalArgumentException("Higher-order names must be strings.");var mode=dimension.has("mode")?PlsSem.Mode.valueOf(dimension.get("mode").getAsString()):PlsSem.Mode.B;var type=dimension.has("measurementType")?PlsSem.MeasurementType.valueOf(dimension.get("measurementType").getAsString()):mode==PlsSem.Mode.A?PlsSem.MeasurementType.REFLECTIVE:PlsSem.MeasurementType.FORMATIVE;double[] initial=null;if(dimension.has("initialWeights")&&!dimension.get("initialWeights").isJsonNull()){var values=dimension.getAsJsonArray("initialWeights");initial=new double[values.size()];for(int j=0;j<initial.length;j++)initial[j]=values.get(j).getAsDouble();}definitions.add(new HigherOrderPls.Dimension(name.getAsString(),PlsModelInput.indices(dimension.get("lowerOrder")),mode,type,initial));}return new HigherOrderPls.Specification(PlsModelInput.indices(object.get("retained")),definitions,PlsModelInput.edges(object.get("edges")),PlsModelInput.options(object.get("options")));}
+}

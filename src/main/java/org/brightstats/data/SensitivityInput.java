@@ -1,0 +1,7 @@
+package org.brightstats.data;
+import java.util.*;import com.google.gson.*;import org.brightstats.stats.*;
+public final class SensitivityInput {
+ private SensitivityInput(){}
+ public static SemSensitivity.InfluenceOptions influence(JsonElement value){var o=StatisticalInput.object(value,Set.of("unit","selectedUnits","maximumRefits","estimator"),"influence options",true);List<String> selected=new ArrayList<>();if(o.has("selectedUnits")){if(!o.get("selectedUnits").isJsonArray())throw new IllegalArgumentException("Selected influence units must be an array of labels.");for(var label:o.getAsJsonArray("selectedUnits"))selected.add(StatisticalInput.text(label));}return new SemSensitivity.InfluenceOptions(StatisticalInput.enumeration(o,"unit",SemSensitivity.Unit.class,SemSensitivity.Unit.CASE),selected,StatisticalInput.integer(o,"maximumRefits",1000),ClusterInput.estimator(o.get("estimator")));}
+ public static List<SemSensitivity.Candidate> candidates(JsonElement value){if(value==null||!value.isJsonArray())throw new IllegalArgumentException("Provide a candidate specification array.");List<SemSensitivity.Candidate> result=new ArrayList<>();for(var entry:value.getAsJsonArray()){var o=StatisticalInput.object(entry,Set.of("name","model","options"),"sensitivity candidate",false);result.add(new SemSensitivity.Candidate(StatisticalInput.text(o.get("name")),SemModelInput.model(o.get("model")),ClusterInput.estimator(o.get("options"))));}return List.copyOf(result);}
+}

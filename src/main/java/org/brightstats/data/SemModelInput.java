@@ -1,0 +1,16 @@
+package org.brightstats.data;
+
+import com.google.gson.*;
+import java.util.*;
+import org.brightstats.stats.SemModel;
+
+/** Explicit own-model schema for new statistical routes; unknown modeling requests fail. */
+public final class SemModelInput {
+    private SemModelInput(){}
+    private static JsonObject object(JsonElement value,Set<String> fields){if(value==null||!value.isJsonObject())throw new IllegalArgumentException("Provide an explicit SEM model object.");var o=value.getAsJsonObject();for(String key:o.keySet())if(!fields.contains(key))throw new IllegalArgumentException("Unsupported SEM model field: "+key);return o;}
+    private static double number(JsonElement value){if(value==null||!value.isJsonPrimitive()||!value.getAsJsonPrimitive().isNumber()||!Double.isFinite(value.getAsDouble()))throw new IllegalArgumentException("SEM numeric fields require finite JSON numbers.");return value.getAsDouble();}
+    private static double[] vector(JsonElement value){if(value==null||!value.isJsonArray()||value.getAsJsonArray().size()>128)throw new IllegalArgumentException("SEM vectors are limited to 128 entries.");double[] result=new double[value.getAsJsonArray().size()];for(int i=0;i<result.length;i++)result[i]=number(value.getAsJsonArray().get(i));return result;}
+    private static double[][] matrix(JsonElement value){if(value==null||!value.isJsonArray()||value.getAsJsonArray().size()>128)throw new IllegalArgumentException("SEM matrices are limited to 128 rows.");double[][] result=new double[value.getAsJsonArray().size()][];for(int i=0;i<result.length;i++)result[i]=vector(value.getAsJsonArray().get(i));return result;}
+    private static String text(JsonElement value){if(value==null||!value.isJsonPrimitive()||!value.getAsJsonPrimitive().isString())throw new IllegalArgumentException("SEM identities and kinds must be JSON strings.");return value.getAsString();}
+    public static SemModel.Model model(JsonElement value){var o=object(value,Set.of("variables","observed","directed","covariance","intercepts","parameters"));List<String> names=new ArrayList<>();for(var name:o.getAsJsonArray("variables"))names.add(text(name));if(names.size()>128)throw new IllegalArgumentException("SEM models are limited to 128 total variables.");List<SemModel.Parameter> parameters=new ArrayList<>();if(o.getAsJsonArray("parameters").size()>300)throw new IllegalArgumentException("SEM models are limited to 300 free parameters.");for(var p:o.getAsJsonArray("parameters")){var field=object(p,Set.of("name","locations","start","scale","lower","upper"));List<SemModel.Location> locations=new ArrayList<>();for(var item:field.getAsJsonArray("locations")){var l=object(item,Set.of("kind","row","column"));locations.add(new SemModel.Location(SemModel.Kind.valueOf(text(l.get("kind"))),PlsModelInput.index(l.get("row")),PlsModelInput.index(l.get("column"))));}parameters.add(new SemModel.Parameter(text(field.get("name")),locations,number(field.get("start")),number(field.get("scale")),field.has("lower")&&!field.get("lower").isJsonNull()?number(field.get("lower")):null,field.has("upper")&&!field.get("upper").isJsonNull()?number(field.get("upper")):null));}return new SemModel.Model(names,PlsModelInput.indices(o.get("observed")),matrix(o.get("directed")),matrix(o.get("covariance")),vector(o.get("intercepts")),parameters);}
+}

@@ -1,0 +1,12 @@
+package org.brightstats.data;
+import java.util.*;
+import com.google.gson.*;
+import org.brightstats.stats.*;
+public final class SemProductInput {
+    private SemProductInput(){}
+    public static SemProductIndicators.Specification specification(JsonElement input){
+        if(input==null||!input.isJsonObject())throw new IllegalArgumentException("Provide a product-indicator SEM specification.");var object=input.getAsJsonObject();var base=object.getAsJsonObject("base");PlsModelInput.indices(base.get("observed"));for(var entry:base.getAsJsonArray("parameters"))for(var location:entry.getAsJsonObject().getAsJsonArray("locations")){PlsModelInput.index(location.getAsJsonObject().get("row"));PlsModelInput.index(location.getAsJsonObject().get("column"));}var model=new Gson().fromJson(base,SemModel.Model.class);List<SemProductIndicators.Interaction> interactions=new ArrayList<>();for(var entry:object.getAsJsonArray("interactions")){var value=entry.getAsJsonObject();var c=value.has("coefficient")?value.getAsJsonObject("coefficient"):new JsonObject();var coefficient=new SemProductIndicators.Coefficient(!c.has("free")||bool(c.get("free")),c.has("value")?c.get("value").getAsDouble():.1,c.has("equality")?c.get("equality").getAsString():"",bound(c,"lower"),bound(c,"upper"),c.has("scale")?c.get("scale").getAsDouble():1);interactions.add(new SemProductIndicators.Interaction(value.get("label").getAsString(),PlsModelInput.indices(value.get("factors")),PlsModelInput.index(value.get("target")),coefficient));}Map<Integer,List<Integer>> blocks=new LinkedHashMap<>();if(object.has("indicatorBlocks")&&!object.get("indicatorBlocks").isJsonNull())for(var entry:object.getAsJsonObject("indicatorBlocks").entrySet()){int factor=new java.math.BigDecimal(entry.getKey()).intValueExact();blocks.put(factor,Arrays.stream(PlsModelInput.indices(entry.getValue())).boxed().toList());}return new SemProductIndicators.Specification(model,PlsModelInput.indices(object.get("columns")),interactions,blocks,object.has("probes")?ProcessInput.probes(object.get("probes")):List.of());
+    }
+    private static boolean bool(JsonElement value){if(!value.isJsonPrimitive()||!value.getAsJsonPrimitive().isBoolean())throw new IllegalArgumentException("Product coefficient free must be boolean.");return value.getAsBoolean();}
+    private static Double bound(JsonObject object,String key){return !object.has(key)||object.get(key).isJsonNull()?null:Double.valueOf(object.get(key).getAsDouble());}
+}

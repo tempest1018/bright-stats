@@ -1,0 +1,25 @@
+# Public publication allowlist. Private development material stays local.
+/*
+!/.gitattributes
+!/.gitignore
+!/README.md
+!/SECURITY.md
+!/THIRD_PARTY.md
+!/dependencies.lock.json
+!/src/
+!/docs/
+/docs/*
+!/docs/INSTALLATION.md
+!/docs/USER_GUIDE.md
+!/docs/KNOWN_ISSUES.md
+!/docs/DEVELOPMENT.md
+!/scripts/
+/scripts/*
+!/scripts/build_public.py
+!/scripts/run_public.py
+!/scripts/check_publication.py
+!/examples/
+/examples/*
+!/examples/README.md
+!/examples/demo.csv
+!/examples/pls.json

@@ -1,0 +1,23 @@
+package org.brightstats.desktop;
+import java.util.*;
+import javafx.geometry.Insets;
+import javafx.scene.control.*;
+import javafx.scene.layout.VBox;
+import javafx.stage.Window;
+import org.brightstats.stats.*;
+final class ModelPcaDialog {
+    private final Dialog<ModelPca.Options> dialog=new Dialog<>();
+    private final ComboBox<ModelPca.Retention> retention=new ComboBox<>();
+    private final ComboBox<PcaRotation.Method> rotation=new ComboBox<>();
+    private final CheckBox correlation=new CheckBox("Correlation PCA (sample-standardized indicators)"),normalize=new CheckBox("Kaiser row normalization for rotation");
+    private final TextField components=new TextField(),variance=new TextField(),power=new TextField(),iterations=new TextField(),tolerance=new TextField();
+    private ModelPca.Options settings;
+    private ModelPcaDialog(Window owner,ModelPca.Source source,ModelPca.Options previous){
+        dialog.initOwner(owner);dialog.setTitle(source.context()+" model indicator PCA");var options=previous==null?ModelPca.Options.defaults():previous;retention.getItems().setAll(ModelPca.Retention.values());retention.setValue(options.retention());rotation.getItems().setAll(PcaRotation.Method.values());rotation.setValue(options.rotation().method());correlation.setSelected(options.correlation());normalize.setSelected(options.rotation().kaiserNormalization());components.setText(Integer.toString(options.components()));variance.setText(Double.toString(options.varianceThreshold()*100));power.setText(Integer.toString(options.rotation().power()));iterations.setText(Integer.toString(options.rotation().maxIterations()));tolerance.setText(Double.toString(options.rotation().tolerance()));
+        Label groupSummary=new Label("All model indicators: "+source.indicators().size()+". Separate measurement groups: "+source.groups().size()+". Cross-loaded indicators can appear in more than one separate group. Structural paths are not estimated by PCA.");groupSummary.setWrapText(true);ListView<String> groups=new ListView<>();for(var group:source.groups())groups.getItems().add(group.name()+": "+String.join(", ",group.indicators()));groups.setPrefHeight(130);Label error=new Label();error.setWrapText(true);
+        VBox content=new VBox(8,groupSummary,groups,correlation,UiAppearance.label("Retention rule"),retention,UiAppearance.label("Fixed count (clipped to each group's variable count)"),components,UiAppearance.label("Cumulative unrotated variance percentage"),variance,UiAppearance.label("Rotation"),rotation,normalize,UiAppearance.label("Promax power (2-6)"),power,UiAppearance.label("Rotation iteration limit"),iterations,UiAppearance.label("Rotation tolerance"),tolerance,error);content.setPadding(new Insets(12));ScrollPane scroll=new ScrollPane(content);scroll.setFitToWidth(true);scroll.setPrefViewportHeight(600);scroll.setPrefViewportWidth(660);dialog.getDialogPane().setContent(scroll);dialog.getDialogPane().getButtonTypes().setAll(ButtonType.OK,ButtonType.CANCEL);
+        dialog.getDialogPane().lookupButton(ButtonType.OK).addEventFilter(javafx.event.ActionEvent.ACTION,event->{settings=null;try{settings=new ModelPca.Options(correlation.isSelected(),retention.getValue(),Integer.parseInt(components.getText().trim()),Double.parseDouble(variance.getText().trim())/100,new PcaRotation.Options(rotation.getValue(),normalize.isSelected(),Integer.parseInt(iterations.getText().trim()),Double.parseDouble(tolerance.getText().trim()),Integer.parseInt(power.getText().trim())));}catch(Exception problem){event.consume();error.setText(problem.getMessage());}});dialog.setResultConverter(button->button==ButtonType.OK?settings:null);
+    }
+    static Optional<ModelPca.Options> show(Window owner,ModelPca.Source source,ModelPca.Options previous){return new ModelPcaDialog(owner,source,previous).dialog.showAndWait();}
+    static ModelPca.Options smokeTest(Window owner,ModelPca.Source source){var test=new ModelPcaDialog(owner,source,null);test.dialog.show();Button ok=(Button)test.dialog.getDialogPane().lookupButton(ButtonType.OK);test.correlation.setSelected(false);ok.fire();if(!test.dialog.isShowing()||test.settings!=null)throw new AssertionError("Covariance Kaiser rule accepted");test.correlation.setSelected(true);test.retention.setValue(ModelPca.Retention.FIXED);test.components.setText("0");ok.fire();if(!test.dialog.isShowing()||test.settings!=null)throw new AssertionError("Zero model PCA components accepted");test.components.setText("2");test.rotation.setValue(PcaRotation.Method.VARIMAX);ok.fire();if(test.dialog.getResult()==null||test.dialog.getResult().rotation().method()!=PcaRotation.Method.VARIMAX)throw new AssertionError("Model PCA settings changed");return test.dialog.getResult();}
+}

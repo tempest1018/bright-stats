@@ -1,0 +1,17 @@
+package org.brightstats.report;
+import com.google.gson.*;
+/** Restore only explicitly numeric arrays; optional object fields retain ordinary JSON null semantics. */
+public final class NumericArchives {
+    private NumericArchives(){}
+    public static void restoreArray(JsonArray array){for(int index=0;index<array.size();index++){var value=array.get(index);if(value.isJsonNull())array.set(index,new JsonPrimitive(Double.NaN));else if(value.isJsonArray())restoreArray(value.getAsJsonArray());else if(value.isJsonPrimitive()&&value.getAsJsonPrimitive().isString()){String text=value.getAsString();if(text.equals("Infinity"))array.set(index,new JsonPrimitive(Double.POSITIVE_INFINITY));else if(text.equals("-Infinity"))array.set(index,new JsonPrimitive(Double.NEGATIVE_INFINITY));}}}
+    public static void restorePls(JsonObject fit){restoreArray(fit.getAsJsonArray("rSquared"));restoreArray(fit.getAsJsonArray("pathCoefficients"));}
+    public static Gson reader(){return new GsonBuilder().setStrictness(Strictness.LENIENT).create();}
+    /** Expected record types identify numeric fields; nullable object fields and arbitrary JSON stay nullable. */
+    public static JsonElement restoreRecord(JsonElement input,Class<?> expected){JsonElement copy=input.deepCopy();restoreTyped(copy,expected,0);return copy;}
+    private static void restoreTyped(JsonElement value,java.lang.reflect.Type expected,int depth){
+        if(depth>64)throw new IllegalArgumentException("Numeric archive nesting exceeds 64 levels.");if(value==null||value.isJsonNull())return;
+        if(expected instanceof java.lang.reflect.ParameterizedType parameterized){var raw=parameterized.getRawType();if(raw instanceof Class<?> cls&&java.util.Collection.class.isAssignableFrom(cls)&&value.isJsonArray())for(var element:value.getAsJsonArray())restoreTyped(element,parameterized.getActualTypeArguments()[0],depth+1);else if(raw instanceof Class<?> cls&&java.util.Map.class.isAssignableFrom(cls)&&value.isJsonObject())for(var entry:value.getAsJsonObject().entrySet())restoreTyped(entry.getValue(),parameterized.getActualTypeArguments()[1],depth+1);return;}
+        if(!(expected instanceof Class<?> type))return;if(type.isArray()&&value.isJsonArray()){var array=value.getAsJsonArray();if(type.getComponentType()==double.class)restoreArray(array);else for(var element:array){if(type.getComponentType().isPrimitive()&&element.isJsonNull())throw new IllegalArgumentException("Null primitive archive array element.");restoreTyped(element,type.getComponentType(),depth+1);}return;}
+        if(type.isRecord()&&value.isJsonObject()){var object=value.getAsJsonObject();for(var field:type.getRecordComponents()){String name=field.getName();var child=object.get(name);if(field.getType().isPrimitive()&&(child==null||child.isJsonNull())&&field.getType()!=double.class)throw new IllegalArgumentException("Missing required primitive archive field: "+type.getSimpleName()+"."+name);if(field.getType()==double.class){if(child==null)throw new IllegalArgumentException("Missing numeric archive field: "+name);if(child.isJsonNull())object.addProperty(name,Double.NaN);else if(child.isJsonPrimitive()&&child.getAsJsonPrimitive().isString()){if(child.getAsString().equals("Infinity"))object.addProperty(name,Double.POSITIVE_INFINITY);else if(child.getAsString().equals("-Infinity"))object.addProperty(name,Double.NEGATIVE_INFINITY);else throw new IllegalArgumentException("Unexpected encoded numeric string: "+name);}}else restoreTyped(child,field.getGenericType(),depth+1);}}
+    }
+}
