@@ -1,5 +1,7 @@
 # Bright-Stats
 
+**Install and run:** [Windows guide](docs/INSTALLATION.md#windows-step-by-step) | [Linux guide](docs/INSTALLATION.md#linux-step-by-step)
+
 Experimental, independent offline statistical modeling for Windows and Linux,
 written in Java with a JavaFX desktop interface and a calculation CLI.
 

@@ -1,5 +1,7 @@
 # Windows and Linux source setup
 
+**Jump to:** [Windows installation](#windows-step-by-step) | [Linux installation](#linux-step-by-step) | [Prerequisites](#prerequisites) | [Troubleshooting](#troubleshooting) | [Back to README](../README.md)
+
 These instructions build a development preview. They do not install a system
 service, change systemwide Node, or provide an offline installer. Keep the complete
 output directory together: the application JAR depends on its `lib` directory.
